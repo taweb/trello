@@ -14,8 +14,8 @@ const Board = () => {
     const [state, dispatch] = React.useReducer(boardReducer, initialState)
     const [inputs, setInputs] = React.useState({})
 
-    const handleClick = id => {
-        history.push(`/task/${id}`)
+    const handleClick = taskId => {
+        history.push(`/task/${taskId}`)
     }
 
     const handleClose = (e) => {
@@ -25,12 +25,12 @@ const Board = () => {
     }
 
     const handleInput = (e) => {
-        const colName = e.target.name
+        const colIndex = e.target.name
         const value = e.target.value
 
         setInputs({
             ...inputs,
-            [colName]: value
+            [colIndex]: value
         })
     }
 
@@ -40,7 +40,7 @@ const Board = () => {
             name && dispatch({
                 key: "CREATE_TASK",
                 payload: {
-                    colName: e.target.name,
+                    colIndex: e.target.name,
                     name
                 }
             })
@@ -51,23 +51,23 @@ const Board = () => {
         }
     }
 
-    const onDragStart = (e, index, fromColName) => {
-        console.log(e, index, fromColName);
+    const onDragStart = (e, fromTaskIndex, fromColIndex) => {
+        // console.log(e, index, fromColName);
         // e.dataTransfer.effectAllowed = "move"
         // e.dataTransfer.dropEffect = "move"
-        e.dataTransfer.setData('task-index', index)
-        e.dataTransfer.setData('from-col-name', fromColName)
+        e.dataTransfer.setData('from-task-index', fromTaskIndex)
+        e.dataTransfer.setData('from-col-index', fromColIndex)
     }
 
-    const onDrop = (e, toColName) => {
-        const fromColName = e.dataTransfer.getData('from-col-name')
-        const taskIndex = e.dataTransfer.getData('task-index')
+    const onDrop = (e, toColIndex) => {
+        const fromColIndex = e.dataTransfer.getData('from-col-index')
+        const fromTaskIndex = e.dataTransfer.getData('from-task-index')
         dispatch({
             key: "MOVE_TASK", 
             payload: {
-                fromColName,
-                toColName,
-                taskIndex
+                fromColIndex,
+                toColIndex,
+                fromTaskIndex
             }
         })
     }
@@ -78,27 +78,26 @@ const Board = () => {
         <StateContext.Provider value={state}>
             <div className="p-4 bg-green-600 h-full overflow-auto relative">
                 <div className="flex flex-row items-start">
-                    {Object.keys(state.columns).map((colName, index) => {
-                        const column = state.columns[colName]
+                    {state.columns.map((column, colIndex) => {
                         return (
                             <div 
-                                key={index}
+                                key={colIndex}
                                 className="bg-gray-300 p-2 mr-4 text-left shadow rounded"
                                 style={{minWidth: "350px"}}
                                 onDragOver={onDragOver}
-                                onDrop={e => onDrop(e, colName)}
+                                onDrop={e => onDrop(e, colIndex)}
                             >
                                 <div className="flex items-center mb-2 font-bold">
-                                    {colName}
+                                    {column.name}
                                 </div>
                                 <div className="list-reset">
-                                    {column.tasks.map((task, index) => (
+                                    {column.tasks.map((task, taskIndex) => (
                                         <div 
-                                            key={index}
+                                            key={taskIndex}
                                             className="flex items-center flex-wrap shadow mb-2 py-2 px-2 rounded bg-white text-gray-800 no-underline"
                                             onClick={() => handleClick(task.id)}
                                             draggable
-                                            onDragStart={e => onDragStart(e, index, colName)}
+                                            onDragStart={e => onDragStart(e, taskIndex, colIndex)}
                                         >
                                             <span className="w-full flex-no-shrink font-bold">
                                                 {task.name}
@@ -118,8 +117,8 @@ const Board = () => {
                                     ))}
                                     <input 
                                         type="text"
-                                        name={colName}
-                                        value={inputs[colName] || ""}
+                                        name={colIndex}
+                                        value={inputs[colIndex] || ""}
                                         className="block p-2 w-full bg-transparent"
                                         placeholder="+ Enter new task"
                                         onChange={handleInput}

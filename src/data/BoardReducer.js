@@ -3,66 +3,72 @@ import { uuid } from '../utils.js'
 const boardReducer = (state, action) => {
   switch (action.key) {
     case "CREATE_TASK": {
-      const {colName, name} = action.payload
-      return {
-        ...state,
-        columns: {
-          ...state.columns,
-          [colName]: {
-            tasks: [
-              ...state.columns[colName].tasks,
-              {
-                name,
-                id: uuid(),
-                description: ''
-              }
-            ]
-          }
-        }
-      }
-    }
-    case "UPDATE_TASK": {
-      const {colName, taskIndex, key, value} = action.payload
-      return {
-        ...state,
-        columns: {
-          ...state.columns,
-          [colName]: {
-            tasks: state.columns[colName].tasks.map((item, index) => {
-              if (index !== taskIndex) {
-                return item
-              }
-              return {
-                ...item,
-                [key]: value
-              }
-            })
-          }
-        }
-      }
-    }
-    case "MOVE_TASK": {
-      const {fromColName, toColName, taskIndex} = action.payload
-      const taskMoving = {
-        ...state.columns[fromColName].tasks[taskIndex]
-      }
+      const {colIndex, name} = action.payload
 
       return {
         ...state,
-        columns: {
-          ...state.columns,
-          [fromColName]: {
-            tasks: state.columns[fromColName].tasks.filter((item, index) => {              
-              return index !== +taskIndex
-            })
-          },
-          [toColName]: {
-            tasks: [
-              ...state.columns[toColName].tasks,
-              taskMoving
-            ]
+        columns: state.columns.map((column, index) => {
+          return index !== +colIndex 
+            ? column 
+            : {
+                ...column,
+                tasks: [...column.tasks, {
+                  name,
+                  id: uuid(), 
+                  description: ''
+                }]
+              }  
+        })
+      }
+    }
+    case "UPDATE_TASK": {
+      const {colIndex, taskIndex, key, value} = action.payload
+      return {
+        ...state,
+        columns: state.columns.map((column, index) => {
+          return index !== +colIndex
+            ? column
+            : {
+                ...column,
+                tasks: column.tasks.map((task, index) => {
+                  if (index !== +taskIndex) {
+                    return task
+                  }
+                  return {
+                    ...task,
+                    [key]: value
+                  }
+              })
+            }
+        })
+      }
+    }
+    case "MOVE_TASK": {
+      const {fromColIndex, toColIndex, fromTaskIndex} = action.payload
+      const fromTasksNew = state.columns[fromColIndex].tasks.slice()
+      const taskToMove = fromTasksNew.splice(fromTaskIndex, 1)
+
+      return {
+        ...state,
+        columns: state.columns.map((column, index) => {
+          if (index === +fromColIndex) {
+            return {
+              ...column,
+              tasks: fromTasksNew
+            }
+          } else if (index === +toColIndex) {
+            return {
+              ...column,
+              tasks: [
+                ...column.tasks.slice(0, +toColIndex),
+                ...taskToMove,
+                ...column.tasks.slice(+toColIndex)
+              ]
+            }
+          } else {
+            return column
           }
-        }
+        })
       }
     }
     default:

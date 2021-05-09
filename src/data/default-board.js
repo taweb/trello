@@ -2,8 +2,9 @@ import { uuid } from '../utils.js'
 
 export default {
   name: 'workshop',
-  columns: {
-    "todo": {
+  columns: [
+    {
+      name: 'todo',
       tasks: [
         {
           description: 'ijij',
@@ -23,9 +24,10 @@ export default {
           id: uuid(),
           userAssigned: null
         }
-      ]
+      ],
     },
-    "in-progress": {
+    {
+      name: 'in-progress', 
       tasks: [
         {
           description: '',
@@ -33,9 +35,10 @@ export default {
           id: uuid(),
           userAssigned: null
         }
-      ]
+      ],
     },
-    "done": {
+    {
+      name: 'done',
       tasks: [
         {
           description: 'This task is competed',
@@ -45,5 +48,5 @@ export default {
         }
       ]
     }
-  }
+  ]
 }
