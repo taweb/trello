@@ -52,9 +52,6 @@ const Board = () => {
     }
 
     const onDragStart = (e, fromTaskIndex, fromColIndex) => {
-        // console.log(e, index, fromColName);
-        // e.dataTransfer.effectAllowed = "move"
-        // e.dataTransfer.dropEffect = "move"
         e.dataTransfer.setData('from-task-index', fromTaskIndex)
         e.dataTransfer.setData('from-col-index', fromColIndex)
     }
